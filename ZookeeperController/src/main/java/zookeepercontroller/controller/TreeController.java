@@ -14,13 +14,13 @@ import zookeepercontroller.util.JSONFile;
 import zookeepercontroller.util.StringUtil;
 import zookeepercontroller.zkconn.ZookeeperConnection;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * User: PageLiu
@@ -31,7 +31,8 @@ import java.util.Set;
 public class TreeController {
     @Resource
     private ZkOptionService zkOptionServiceImpl;
-
+    private static final Logger log = LoggerFactory
+			.getLogger(TreeController.class);
 
     public ZookeeperConnection getConnection(){
         ZookeeperConnection connection;
@@ -46,6 +47,8 @@ public class TreeController {
 
         ZookeeperConnection connection = getConnection();
         connection.setConnectString(connectStr);
+        log.info("zpath="+zpath);
+        log.info("connection="+connection);
         ValueNode vn = zkOptionServiceImpl.getValueNode(zpath, connection);
         ZTree zTree = ConvertTreeNode.convertValueNode(vn);
         String json = Bean2ViewUtil.cvtTree2Json(zTree);
@@ -56,12 +59,17 @@ public class TreeController {
 
     @RequestMapping(value = "/getPathData")
     public String showTreeData(@RequestParam(required = false)String path,@RequestParam(required = true)String zpath,@RequestParam(required = true)String connectStr,HttpServletRequest request,HttpServletResponse response) throws IOException, InterruptedException, KeeperException {
-
+        log.info("zpath="+zpath);
         ZookeeperConnection connection = getConnection();
+        log.info("connection="+connection);
         connection.setConnectString(connectStr);
+        log.info("connectStr="+connectStr);
         ValueNode vn = zkOptionServiceImpl.getValueNode(zpath, connection);
+        log.info("vn="+vn);
         ZTree zTree = ConvertTreeNode.convertValueNode(vn);
+        log.info("zTree="+zTree);
         String json = Bean2ViewUtil.cvtTreeChilds2Json(zTree);
+        log.info("json="+json);
         response.setContentType("application/json;charset=UTF-8");
         response.getOutputStream().write(json.getBytes());
         return null;
